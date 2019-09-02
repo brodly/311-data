@@ -1,3 +1,5 @@
+// const config = require('../config');
+
 (function(){
   let chartData = [];
 
@@ -56,13 +58,56 @@
                       });
 
     Promise.all(datasets)
-      .then(() => { renderChart(chartData, chartType); })
+      // .then(() => { renderChart(chartData, chartType); })
+      .then(() => { renderMarkers(chartData, chartType); })
       .catch(err => { console.error('Render Error :-S', err)});
    };
 
   function renderChart(columns, type) {
     chart.load({ columns, type });
   };
+
+  function renderMarkers(chartData, chartType) {
+    chartData.forEach(marker => {
+      const ignore = [
+        'location',
+        'suffix',
+        'assignto',
+        'housenumber',
+        'BOS',
+        'approximateaddress',
+        'tbmrow',
+        'tbmpage',
+        'tbmcolumn',
+        'streetname',
+        'policeprecinct',
+        'apc',
+      ];
+      const { longitude, latitude } = marker.location;
+      const content = Object.entries(marker)
+        .map(entry => {
+          if (ignore.includes(entry[0])) return;
+          return `<div>${entry.join(': ')}</div>`
+        })
+        .join('')
+
+      const markerInfo = {
+        lngLat: [latitude, longitude],
+        content,
+      };
+      const pin = L.marker(markerInfo.lngLat).addTo(mymap);
+      pin.bindPopup(markerInfo.content).openPopup();
+    })
+  }
+
+  const mymap = L.map('mapid').setView([34.0173157, -118.2497254], 10);
+
+  L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: 'mapbox.streets',
+    accessToken: 'pk.eyJ1Ijoiam9zaHVhbWFyeCIsImEiOiJjazAxb3NiNmMweXR2M2NzY2F0dXk4MGduIn0.8b_04D-em34ScpYyrnRECQ',
+  }).addTo(mymap);
 
   document.querySelector('button').onclick = e => {
     e.preventDefault();

@@ -23,7 +23,7 @@ const config = year => {
 
 const params = (requestType = 'Bulky Items', total = false) => {
   return {
-    $select: total ? ['count(requesttype)'] : ['createddate', 'zipcode', 'requesttype'],
+    $select: total ? ['count(requesttype)'] : ['*'],
     $where: `requesttype="${requestType}"`,
     $limit: 100,
   };
@@ -59,8 +59,8 @@ app.get('/soda/:year/:requestType', (req, res) => {
       console.error(err);
       res.sendStatus(500);
     } else {
-      const toSend = parseDataByYear(data, 'zipcode');
-      res.send(toSend);
+      // const toSend = parseDataByYear(data, 'zipcode');
+      res.send(data);
     }
   });
 })
